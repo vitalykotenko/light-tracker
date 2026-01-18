@@ -19,7 +19,7 @@
 
     .hidden { display: none; }
 
-    /* ===== СПИСОК МІСЯЦІВ ===== */
+    /* ===== МІСЯЦІ ===== */
     .months {
       padding: 16px;
     }
@@ -47,6 +47,10 @@
       align-items: center;
       justify-content: center;
       font-size: 15px;
+    }
+
+    .day.filled {
+      background: #1c2a3a; /* легкий синій */
     }
 
     .day:active {
@@ -141,9 +145,17 @@
     const daysInMonth = new Date(YEAR, monthIndex + 1, 0).getDate();
 
     for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${YEAR}-${String(monthIndex+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const saved = JSON.parse(localStorage.getItem(key)) || [];
+
       const day = document.createElement("div");
       day.className = "day";
       day.textContent = d;
+
+      if (saved.some(v => v > 0)) {
+        day.classList.add("filled");
+      }
+
       day.onclick = () => openDay(monthIndex, d);
       grid.appendChild(day);
     }
