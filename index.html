@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Облік світла</title>
 
+  <!-- PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="theme-color" content="#000000">
@@ -17,7 +18,9 @@
       color: #fff;
     }
 
-    .hidden { display: none; }
+    .hidden {
+      display: none;
+    }
 
     /* ===== КАЛЕНДАР ===== */
     .calendar {
@@ -37,51 +40,58 @@
     }
 
     .day {
-      padding: 10px 0;
+      padding: 12px 0;
       border-radius: 10px;
       background: #1c1c1e;
+      font-size: 16px;
     }
 
     .day:active {
       background: #2c2c2e;
     }
 
-    /* ===== ДЕНЬ ===== */
+    /* ===== ЕКРАН ДНЯ ===== */
     .day-view {
-      padding: 16px;
+      height: 100vh;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
     }
 
     .top-bar {
       display: flex;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
 
     .back {
-      font-size: 16px;
+      font-size: 17px;
       color: #0a84ff;
     }
 
     .date-title {
       margin-left: 12px;
-      font-size: 16px;
+      font-size: 15px;
       color: #aaa;
     }
 
     .grid-hours {
+      flex: 1;
       display: grid;
       grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(4, 1fr);
       gap: 8px;
     }
 
     .hour {
-      aspect-ratio: 1 / 1;
-      border-radius: 12px;
+      border-radius: 14px;
       background: #1c1c1e;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 14px;
       color: #aaa;
       user-select: none;
     }
@@ -99,13 +109,13 @@
 </head>
 <body>
 
-<!-- КАЛЕНДАР -->
+<!-- ===== КАЛЕНДАР ===== -->
 <div id="calendar" class="calendar">
   <div class="month-title">Січень 2026</div>
   <div class="grid-calendar" id="calendarGrid"></div>
 </div>
 
-<!-- ДЕНЬ -->
+<!-- ===== ДЕНЬ ===== -->
 <div id="dayView" class="day-view hidden">
   <div class="top-bar">
     <div class="back" id="backBtn">← Назад</div>
@@ -115,8 +125,8 @@
 </div>
 
 <script>
-  const calendarGrid = document.getElementById("calendarGrid");
   const calendar = document.getElementById("calendar");
+  const calendarGrid = document.getElementById("calendarGrid");
   const dayView = document.getElementById("dayView");
   const hoursGrid = document.getElementById("hoursGrid");
   const dateTitle = document.getElementById("dateTitle");
@@ -160,7 +170,7 @@
   }
 
   function applyState(el, state) {
-    el.classList.remove("red","green");
+    el.classList.remove("red", "green");
     if (state === 1) el.classList.add("red");
     if (state === 2) el.classList.add("green");
   }
