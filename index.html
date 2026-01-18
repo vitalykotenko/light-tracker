@@ -19,26 +19,18 @@
 
     .hidden { display: none; }
 
-    /* ===== КАЛЕНДАР ===== */
-    .calendar {
+    /* ===== СПИСОК МІСЯЦІВ ===== */
+    .months {
       padding: 16px;
     }
 
-    .month-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
+    .month {
+      margin-bottom: 32px;
     }
 
     .month-title {
       font-size: 22px;
-    }
-
-    .month-btn {
-      color: #0a84ff;
-      font-size: 20px;
-      user-select: none;
+      margin-bottom: 12px;
     }
 
     .grid-calendar {
@@ -54,7 +46,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .day:active {
@@ -107,15 +99,8 @@
 </head>
 <body>
 
-<!-- ===== КАЛЕНДАР ===== -->
-<div id="calendar" class="calendar">
-  <div class="month-header">
-    <div class="month-btn" id="prevMonth">‹</div>
-    <div class="month-title" id="monthTitle"></div>
-    <div class="month-btn" id="nextMonth">›</div>
-  </div>
-  <div class="grid-calendar" id="calendarGrid"></div>
-</div>
+<!-- ===== МІСЯЦІ 2026 ===== -->
+<div id="months" class="months"></div>
 
 <!-- ===== ДЕНЬ ===== -->
 <div id="dayView" class="day-view hidden">
@@ -128,45 +113,54 @@
 
 <script>
   const YEAR = 2026;
-  const months = [
+  const monthsNames = [
     "Січень","Лютий","Березень","Квітень","Травень","Червень",
     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"
   ];
 
-  let currentMonth = 0;
-
-  const calendar = document.getElementById("calendar");
-  const calendarGrid = document.getElementById("calendarGrid");
-  const monthTitle = document.getElementById("monthTitle");
-  const prevMonth = document.getElementById("prevMonth");
-  const nextMonth = document.getElementById("nextMonth");
-
+  const monthsEl = document.getElementById("months");
   const dayView = document.getElementById("dayView");
   const hoursGrid = document.getElementById("hoursGrid");
   const dateTitle = document.getElementById("dateTitle");
   const backBtn = document.getElementById("backBtn");
 
-  function renderCalendar() {
-    calendarGrid.innerHTML = "";
-    monthTitle.textContent = `${months[currentMonth]} ${YEAR}`;
+  let scrollY = 0;
 
-    const daysInMonth = new Date(YEAR, currentMonth + 1, 0).getDate();
+  // ===== РЕНДЕР УСІХ МІСЯЦІВ =====
+  monthsNames.forEach((name, monthIndex) => {
+    const monthEl = document.createElement("div");
+    monthEl.className = "month";
+
+    const title = document.createElement("div");
+    title.className = "month-title";
+    title.textContent = `${name} ${YEAR}`;
+
+    const grid = document.createElement("div");
+    grid.className = "grid-calendar";
+
+    const daysInMonth = new Date(YEAR, monthIndex + 1, 0).getDate();
 
     for (let d = 1; d <= daysInMonth; d++) {
-      const div = document.createElement("div");
-      div.className = "day";
-      div.textContent = d;
-      div.onclick = () => openDay(d);
-      calendarGrid.appendChild(div);
+      const day = document.createElement("div");
+      day.className = "day";
+      day.textContent = d;
+      day.onclick = () => openDay(monthIndex, d);
+      grid.appendChild(day);
     }
-  }
 
-  function openDay(day) {
-    calendar.classList.add("hidden");
+    monthEl.appendChild(title);
+    monthEl.appendChild(grid);
+    monthsEl.appendChild(monthEl);
+  });
+
+  function openDay(month, day) {
+    scrollY = window.scrollY;
+
+    monthsEl.classList.add("hidden");
     dayView.classList.remove("hidden");
 
-    const key = `${YEAR}-${String(currentMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    dateTitle.textContent = `${day} ${months[currentMonth].toLowerCase()} ${YEAR}`;
+    const key = `${YEAR}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    dateTitle.textContent = `${day} ${monthsNames[month].toLowerCase()} ${YEAR}`;
 
     hoursGrid.innerHTML = "";
     const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
@@ -196,24 +190,9 @@
 
   backBtn.onclick = () => {
     dayView.classList.add("hidden");
-    calendar.classList.remove("hidden");
+    monthsEl.classList.remove("hidden");
+    window.scrollTo(0, scrollY);
   };
-
-  prevMonth.onclick = () => {
-    if (currentMonth > 0) {
-      currentMonth--;
-      renderCalendar();
-    }
-  };
-
-  nextMonth.onclick = () => {
-    if (currentMonth < 11) {
-      currentMonth++;
-      renderCalendar();
-    }
-  };
-
-  renderCalendar();
 </script>
 
 </body>
