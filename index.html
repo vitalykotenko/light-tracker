@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Облік світла</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
 
     .hidden { display: none; }
 
-    /* ===== TOP BAR ===== */
+    /* ===== TOP ===== */
     .top-actions {
       display: flex;
       gap: 12px;
@@ -37,9 +37,7 @@
 
     .btn:active { background: #2c2c2e; }
 
-    .container {
-      padding: 16px;
-    }
+    .container { padding: 16px; }
 
     /* ===== LIST ===== */
     .list-item {
@@ -50,11 +48,9 @@
       font-size: 17px;
     }
 
-    .list-item:active {
-      background: #2c2c2e;
-    }
+    .list-item:active { background: #2c2c2e; }
 
-    /* ===== MONTH GRID ===== */
+    /* ===== MONTH ===== */
     .month-title {
       font-size: 22px;
       margin-bottom: 12px;
@@ -76,15 +72,10 @@
       font-size: 15px;
     }
 
-    .day.filled {
-      background: #1c2a3a;
-    }
+    .day.filled { background: #1c2a3a; }
+    .day:active { background: #2c2c2e; }
 
-    .day:active {
-      background: #2c2c2e;
-    }
-
-    /* ===== DAY VIEW ===== */
+    /* ===== DAY ===== */
     .top-bar {
       display: flex;
       align-items: center;
@@ -134,16 +125,11 @@
   <input type="file" id="fileInput" accept=".csv">
 </div>
 
-<!-- ===== YEARS ===== -->
+<!-- ===== VIEWS ===== -->
 <div id="yearsView" class="container hidden"></div>
-
-<!-- ===== MONTHS LIST ===== -->
 <div id="monthsListView" class="container hidden"></div>
-
-<!-- ===== MONTH ===== -->
 <div id="monthView" class="container hidden"></div>
 
-<!-- ===== DAY ===== -->
 <div id="dayView" class="container hidden">
   <div class="top-bar">
     <div class="back" id="backBtn">← Назад</div>
@@ -189,8 +175,10 @@ function push(view) {
 }
 
 function back() {
-  navStack.pop();
-  show(navStack[navStack.length - 1]);
+  if (navStack.length > 1) {
+    navStack.pop();
+    show(navStack[navStack.length - 1]);
+  }
 }
 
 /* ===== YEARS ===== */
@@ -294,7 +282,9 @@ backBtn.onclick = back;
 /* ===== EXPORT / IMPORT ===== */
 exportBtn.onclick = () => {
   let csv = "date," + Array.from({length:24},(_,i)=>`h${String(i).padStart(2,"0")}`).join(",") + "\n";
-  Object.keys(localStorage).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort()
+  Object.keys(localStorage)
+    .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .sort()
     .forEach(k => csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n");
 
   const blob = new Blob([csv], { type: "text/csv" });
@@ -330,6 +320,8 @@ fileInput.onchange = e => {
   renderMonth();
 
   navStack = [];
+  push(yearsView);
+  push(monthsListView);
   push(monthView);
 })();
 </script>
