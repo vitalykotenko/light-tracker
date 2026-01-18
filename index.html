@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Облік світла</title>
 
+<!-- PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#000000">
+
+<link rel="apple-touch-icon" href="IMG_5535.png">
+<link rel="icon" type="image/png" sizes="180x180" href="IMG_5535.png">
 
 <style>
 body {
@@ -70,7 +74,7 @@ body {
 }
 
 .day {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1;
   border-radius: 10px;
   background: #1c1c1e;
   display: flex;
@@ -88,7 +92,7 @@ body {
 }
 
 .hour {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1;
   border-radius: 14px;
   background: #1c1c1e;
   display: flex;
@@ -101,22 +105,6 @@ body {
 .hour.red { background: #b3261e; color: #fff; }
 .hour.green { background: #1fa14a; color: #fff; }
 
-/* ===== PREVIEW HOURS (MONTH ONLY) ===== */
-.hour-preview {
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
-  background: #1c1c1e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #aaa;
-  pointer-events: none;
-}
-
-.hour-preview.red { background: #b3261e; color: #fff; }
-.hour-preview.green { background: #1fa14a; color: #fff; }
-
 /* ===== MONTH TIMELINE ===== */
 .day-separator {
   margin: 24px 0 6px;
@@ -127,9 +115,9 @@ body {
 }
 
 .day-summary {
-  margin-bottom: 8px;
   font-size: 13px;
   color: #8e8e93;
+  margin-bottom: 6px;
 }
 
 input[type="file"] { display: none; }
@@ -137,6 +125,7 @@ input[type="file"] { display: none; }
 </head>
 <body>
 
+<!-- ===== HEADER ===== -->
 <div class="header">
   <div id="navBtn" class="nav-btn"></div>
   <div class="actions">
@@ -146,40 +135,85 @@ input[type="file"] { display: none; }
   </div>
 </div>
 
-<div id="monthView" class="container"></div>
+<!-- ===== VIEWS ===== -->
+<div id="yearsView" class="container hidden"></div>
+<div id="monthsView" class="container hidden"></div>
+<div id="monthView" class="container hidden"></div>
 <div id="dayView" class="container hidden"></div>
 
 <script>
+const YEARS = [2026, 2027];
 const MONTHS = ["Січень","Лютий","Березень","Квітень","Травень","Червень",
                 "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
-let currentYear = 2026;
-let currentMonth = 0;
-let currentDay = 1;
 let view = "month";
+let currentYear, currentMonth, currentDay;
 
+const navBtn = document.getElementById("navBtn");
+const yearsView = document.getElementById("yearsView");
+const monthsView = document.getElementById("monthsView");
 const monthView = document.getElementById("monthView");
 const dayView = document.getElementById("dayView");
-const navBtn = document.getElementById("navBtn");
 
-/* ===== NAV ===== */
+function show(v) {
+  [yearsView, monthsView, monthView, dayView].forEach(x => x.classList.add("hidden"));
+  v.classList.remove("hidden");
+  updateNav();
+}
+
 function updateNav() {
+  navBtn.onclick = null;
   if (view === "day") {
     navBtn.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
     navBtn.onclick = () => openMonth();
-  } else {
+  } else if (view === "month") {
     navBtn.textContent = currentYear;
-    navBtn.onclick = null;
+    navBtn.onclick = () => openMonths();
+  } else if (view === "months") {
+    navBtn.textContent = "Роки";
+    navBtn.onclick = () => openYears();
+  } else {
+    navBtn.textContent = "";
   }
 }
 
-/* ===== MONTH ===== */
+function openYears() {
+  view = "years";
+  yearsView.innerHTML = "";
+  YEARS.forEach(y => {
+    const d = document.createElement("div");
+    d.className = "list-item";
+    d.textContent = y;
+    d.onclick = () => { currentYear = y; openMonths(); };
+    yearsView.appendChild(d);
+  });
+  show(yearsView);
+}
+
+function openMonths() {
+  view = "months";
+  monthsView.innerHTML = "";
+  MONTHS.forEach((m,i) => {
+    const d = document.createElement("div");
+    d.className = "list-item";
+    d.textContent = m;
+    d.onclick = () => { currentMonth = i; openMonth(); };
+    monthsView.appendChild(d);
+  });
+  show(monthsView);
+}
+
 function openMonth() {
   view = "month";
-  dayView.classList.add("hidden");
-  monthView.classList.remove("hidden");
   renderMonth();
-  updateNav();
+  show(monthView);
+}
+
+function openDay(d) {
+  currentDay = d;
+  view = "day";
+  renderDay();
+  show(dayView);
 }
 
 function renderMonth() {
@@ -208,48 +242,37 @@ function renderMonth() {
   monthView.appendChild(title);
   monthView.appendChild(grid);
 
-  /* ===== ANALYTICS ===== */
   for (let d = 1; d <= daysInMonth; d++) {
     const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
 
-    const red = data.filter(v => v === 1).length;
-    const green = data.filter(v => v === 2).length;
+    const on = data.filter(v => v === 2).length;
+    const off = data.filter(v => v === 1).length;
 
-    const sep = document.createElement("div");
-    sep.className = "day-separator";
-    sep.textContent = `${String(d).padStart(2,"0")}.${String(currentMonth+1).padStart(2,"0")}.${currentYear}`;
+    const label = document.createElement("div");
+    label.className = "day-separator";
+    label.textContent = `${String(d).padStart(2,"0")}.${String(currentMonth+1).padStart(2,"0")}.${currentYear}`;
 
     const summary = document.createElement("div");
     summary.className = "day-summary";
-    summary.textContent = `Світло є: ${green} год · Світла немає: ${red} год`;
+    summary.textContent = `Світло є — ${on} год · Немає — ${off} год`;
 
-    const gridH = document.createElement("div");
-    gridH.className = "grid-hours";
+    const gridHours = document.createElement("div");
+    gridHours.className = "grid-hours";
 
     for (let h = 0; h < 24; h++) {
-      const c = document.createElement("div");
-      c.className = "hour-preview";
-      c.textContent = `${String(h).padStart(2,"0")}–${String(h+1).padStart(2,"0")}`;
-      if (data[h] === 1) c.classList.add("red");
-      if (data[h] === 2) c.classList.add("green");
-      gridH.appendChild(c);
+      const cell = document.createElement("div");
+      cell.className = "hour";
+      cell.textContent = `${String(h).padStart(2,"0")}–${String(h+1).padStart(2,"0")}`;
+      if (data[h] === 1) cell.classList.add("red");
+      if (data[h] === 2) cell.classList.add("green");
+      gridHours.appendChild(cell);
     }
 
-    monthView.appendChild(sep);
+    monthView.appendChild(label);
     monthView.appendChild(summary);
-    monthView.appendChild(gridH);
+    monthView.appendChild(gridHours);
   }
-}
-
-/* ===== DAY ===== */
-function openDay(d) {
-  currentDay = d;
-  view = "day";
-  monthView.classList.add("hidden");
-  dayView.classList.remove("hidden");
-  renderDay();
-  updateNav();
 }
 
 function renderDay() {
@@ -266,21 +289,51 @@ function renderDay() {
     h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
     if (data[i] === 1) h.classList.add("red");
     if (data[i] === 2) h.classList.add("green");
-
     h.onclick = () => {
       data[i] = (data[i] + 1) % 3;
       localStorage.setItem(key, JSON.stringify(data));
       renderDay();
     };
-
     grid.appendChild(h);
   }
-
   dayView.appendChild(grid);
 }
 
+/* ===== CSV ===== */
+exportBtn.onclick = () => {
+  let csv = "date," + Array.from({length:24},(_,i)=>`h${i}`).join(",") + "\n";
+  Object.keys(localStorage).sort().forEach(k => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(k))
+      csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n";
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.download = "light-data.csv";
+  a.click();
+};
+
+importBtn.onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  const r = new FileReader();
+  r.onload = () => {
+    r.result.split("\n").slice(1).forEach(l => {
+      if (!l.trim()) return;
+      const [d,...v] = l.split(",");
+      localStorage.setItem(d, JSON.stringify(v.map(Number)));
+    });
+    openMonth();
+    alert("Імпорт завершено");
+  };
+  r.readAsText(e.target.files[0]);
+};
+
 /* ===== START ===== */
-openMonth();
+(() => {
+  const now = new Date();
+  currentYear = YEARS.includes(now.getFullYear()) ? now.getFullYear() : YEARS[0];
+  currentMonth = now.getMonth();
+  openMonth();
+})();
 </script>
 </body>
 </html>
