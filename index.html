@@ -1,209 +1,188 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Облік світла</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Облік світла</title>
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000000">
 
-<style>
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, system-ui;
-  background: #000;
-  color: #fff;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui;
+      background: #000;
+      color: #fff;
+    }
 
-.hidden { display: none; }
+    .hidden { display: none; }
 
-/* ===== HEADER ===== */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #1c1c1e;
-}
+    /* ===== TOP ===== */
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #1c1c1e;
+    }
 
-.nav-btn {
-  color: #0a84ff;
-  font-size: 17px;
-}
+    .nav-back {
+      color: #0a84ff;
+      font-size: 16px;
+      margin-right: auto;
+    }
 
-.actions {
-  display: flex;
-  gap: 12px;
-}
+    .btn {
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #1c1c1e;
+      color: #0a84ff;
+      font-size: 14px;
+    }
 
-.btn {
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: #1c1c1e;
-  color: #0a84ff;
-  font-size: 14px;
-}
+    .btn:active { background: #2c2c2e; }
 
-.btn:active { background: #2c2c2e; }
+    .container { padding: 16px; }
 
-.container { padding: 16px; }
+    /* ===== LIST ===== */
+    .list-item {
+      padding: 14px;
+      border-radius: 14px;
+      background: #1c1c1e;
+      margin-bottom: 10px;
+      font-size: 17px;
+    }
 
-/* ===== LIST ===== */
-.list-item {
-  padding: 14px;
-  border-radius: 12px;
-  background: #1c1c1e;
-  margin-bottom: 8px;
-  font-size: 17px;
-}
-.list-item:active { background: #2c2c2e; }
+    .list-item:active { background: #2c2c2e; }
 
-/* ===== MONTH GRID ===== */
-.month-title {
-  font-size: 22px;
-  margin-bottom: 12px;
-}
+    /* ===== MONTH ===== */
+    .month-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
 
-.grid-calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
+    .grid-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
 
-.day {
-  aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  background: #1c1c1e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.day.filled { background: #1c2a3a; }
-.day:active { background: #2c2c2e; }
+    .day {
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      background: #1c1c1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
 
-/* ===== HOURS ===== */
-.grid-hours {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-}
+    .day.filled { background: #1c2a3a; }
+    .day:active { background: #2c2c2e; }
 
-.hour {
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
-  background: #1c1c1e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  color: #aaa;
-}
+    /* ===== DAY HOURS ===== */
+    .day-block {
+      border-top: 1px solid #1c1c1e;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
 
-.hour.red { background: #b3261e; color: #fff; }
-.hour.green { background: #1fa14a; color: #fff; }
+    .date-label {
+      font-size: 15px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
 
-/* ===== MONTH TIMELINE ===== */
-.day-separator {
-  margin: 24px 0 8px;
-  padding-top: 8px;
-  border-top: 1px solid #1c1c1e;
-  color: #8e8e93;
-  font-size: 14px;
-}
+    .grid-hours {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
 
-input[type="file"] { display: none; }
-</style>
+    .hour {
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      background: #1c1c1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .hour.red { background: #b3261e; color: #fff; }
+    .hour.green { background: #1fa14a; color: #fff; }
+
+    .summary {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    input[type="file"] { display: none; }
+  </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
-<div class="header">
-  <div id="navBtn" class="nav-btn"></div>
-  <div class="actions">
-    <div class="btn" id="exportBtn">Експорт CSV</div>
-    <div class="btn" id="importBtn">Імпорт CSV</div>
-    <input type="file" id="fileInput" accept=".csv">
-  </div>
+<!-- ===== TOP BAR ===== -->
+<div class="top-actions">
+  <div class="nav-back" id="navBack"></div>
+  <div class="btn" id="exportBtn">Експорт CSV</div>
+  <div class="btn" id="importBtn">Імпорт CSV</div>
+  <input type="file" id="fileInput" accept=".csv">
 </div>
 
 <!-- ===== VIEWS ===== -->
 <div id="yearsView" class="container hidden"></div>
 <div id="monthsView" class="container hidden"></div>
 <div id="monthView" class="container hidden"></div>
-<div id="dayView" class="container hidden"></div>
 
 <script>
 /* ===== CONFIG ===== */
 const YEARS = [2026, 2027];
-const MONTHS = ["Січень","Лютий","Березень","Квітень","Травень","Червень",
-                "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
+const MONTHS = [
+  "Січень","Лютий","Березень","Квітень","Травень","Червень",
+  "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"
+];
 
 /* ===== STATE ===== */
-let view = "month";
-let currentYear, currentMonth, currentDay;
+let currentYear, currentMonth;
+let view = "years";
 
 /* ===== ELEMENTS ===== */
-const navBtn = document.getElementById("navBtn");
 const yearsView = document.getElementById("yearsView");
 const monthsView = document.getElementById("monthsView");
 const monthView = document.getElementById("monthView");
-const dayView = document.getElementById("dayView");
+const navBack = document.getElementById("navBack");
+
 const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const fileInput = document.getElementById("fileInput");
 
-/* ===== VIEW SWITCH ===== */
-function show(target) {
-  [yearsView, monthsView, monthView, dayView].forEach(v => v.classList.add("hidden"));
-  target.classList.remove("hidden");
-  updateNav();
+/* ===== NAV ===== */
+function show(v) {
+  view = v;
+  [yearsView, monthsView, monthView].forEach(e => e.classList.add("hidden"));
+  if (v === "years") yearsView.classList.remove("hidden");
+  if (v === "months") monthsView.classList.remove("hidden");
+  if (v === "month") monthView.classList.remove("hidden");
+  updateBack();
 }
 
-/* ===== NAV BUTTON ===== */
-function updateNav() {
-  navBtn.textContent = "";
-  navBtn.onclick = null;
-
-  if (view === "day") {
-    navBtn.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
-    navBtn.onclick = () => openMonth();
+function updateBack() {
+  if (view === "months") {
+    navBack.textContent = "Роки";
+    navBack.onclick = () => show("years");
+  } else if (view === "month") {
+    navBack.textContent = currentYear;
+    navBack.onclick = () => show("months");
+  } else {
+    navBack.textContent = "";
+    navBack.onclick = null;
   }
-  else if (view === "month") {
-    navBtn.textContent = currentYear;
-    navBtn.onclick = () => openMonths();
-  }
-  else if (view === "months") {
-    navBtn.textContent = "Роки";
-    navBtn.onclick = () => openYears();
-  }
-}
-
-/* ===== OPENERS ===== */
-function openYears() {
-  view = "years";
-  renderYears();
-  show(yearsView);
-}
-
-function openMonths() {
-  view = "months";
-  renderMonths();
-  show(monthsView);
-}
-
-function openMonth() {
-  view = "month";
-  renderMonth();
-  show(monthView);
-}
-
-function openDay(day) {
-  currentDay = day;
-  view = "day";
-  renderDay();
-  show(dayView);
 }
 
 /* ===== YEARS ===== */
@@ -215,7 +194,8 @@ function renderYears() {
     d.textContent = y;
     d.onclick = () => {
       currentYear = y;
-      openMonths();
+      renderMonths();
+      show("months");
     };
     yearsView.appendChild(d);
   });
@@ -230,20 +210,23 @@ function renderMonths() {
     d.textContent = m;
     d.onclick = () => {
       currentMonth = i;
-      openMonth();
+      renderMonth();
+      show("month");
     };
     monthsView.appendChild(d);
   });
 }
 
-/* ===== MONTH ===== */
+/* ===== MONTH VIEW ===== */
 function renderMonth() {
   monthView.innerHTML = "";
 
   const title = document.createElement("div");
   title.className = "month-title";
   title.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  monthView.appendChild(title);
 
+  /* days grid */
   const grid = document.createElement("div");
   grid.className = "grid-calendar";
 
@@ -252,104 +235,115 @@ function renderMonth() {
   for (let d = 1; d <= daysInMonth; d++) {
     const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const data = JSON.parse(localStorage.getItem(key)) || [];
-    const el = document.createElement("div");
-    el.className = "day";
-    el.textContent = d;
-    if (data.some(v => v > 0)) el.classList.add("filled");
-    el.onclick = () => openDay(d);
-    grid.appendChild(el);
+    const filled = data.some(v => v > 0);
+
+    const day = document.createElement("div");
+    day.className = "day";
+    if (filled) day.classList.add("filled");
+    day.textContent = d;
+
+    day.onclick = () => openDay(d);
+    grid.appendChild(day);
   }
 
-  monthView.appendChild(title);
   monthView.appendChild(grid);
 
-  /* ===== MONTH TIMELINE ===== */
+  /* days list */
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateKey = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
+
+    const block = document.createElement("div");
+    block.className = "day-block";
+
     const label = document.createElement("div");
-    label.className = "day-separator";
+    label.className = "date-label";
     label.textContent = `${String(d).padStart(2,"0")}.${String(currentMonth+1).padStart(2,"0")}.${currentYear}`;
+    block.appendChild(label);
 
-    const gridHours = document.createElement("div");
-    gridHours.className = "grid-hours";
+    const gridH = document.createElement("div");
+    gridH.className = "grid-hours";
 
-    const data = JSON.parse(localStorage.getItem(dateKey)) || Array(24).fill(0);
+    let on = 0, off = 0;
 
-    for (let h = 0; h < 24; h++) {
-      const cell = document.createElement("div");
-      cell.className = "hour";
-      cell.textContent = `${String(h).padStart(2,"0")}–${String(h+1).padStart(2,"0")}`;
-      if (data[h] === 1) cell.classList.add("red");
-      if (data[h] === 2) cell.classList.add("green");
-      gridHours.appendChild(cell);
+    for (let i = 0; i < 24; i++) {
+      const h = document.createElement("div");
+      h.className = "hour";
+      h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
+
+      if (data[i] === 1) { h.classList.add("red"); off++; }
+      if (data[i] === 2) { h.classList.add("green"); on++; }
+      if (data[i] === 0) off++;
+
+      gridH.appendChild(h);
     }
 
-    monthView.appendChild(label);
-    monthView.appendChild(gridHours);
+    block.appendChild(gridH);
+
+    const summary = document.createElement("div");
+    summary.className = "summary";
+    summary.textContent = `Світло є — ${on} год · Світла нема — ${off} год`;
+    block.appendChild(summary);
+
+    monthView.appendChild(block);
   }
 }
 
-/* ===== DAY ===== */
-function renderDay() {
-  dayView.innerHTML = "";
-  const grid = document.createElement("div");
-  grid.className = "grid-hours";
-
-  const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(currentDay).padStart(2,"0")}`;
+/* ===== DAY EDIT ===== */
+function openDay(day) {
+  const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
   const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
 
   for (let i = 0; i < 24; i++) {
-    const h = document.createElement("div");
-    h.className = "hour";
-    h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
-    if (data[i] === 1) h.classList.add("red");
-    if (data[i] === 2) h.classList.add("green");
-    h.onclick = () => {
-      data[i] = (data[i] + 1) % 3;
-      localStorage.setItem(key, JSON.stringify(data));
-      renderDay();
-    };
-    grid.appendChild(h);
+    data[i] = (data[i] + 1) % 3;
   }
 
-  dayView.appendChild(grid);
+  localStorage.setItem(key, JSON.stringify(data));
+  renderMonth();
 }
 
 /* ===== EXPORT / IMPORT ===== */
 exportBtn.onclick = () => {
-  let csv = "date," + Array.from({length:24},(_,i)=>`h${i}`).join(",") + "\n";
-  Object.keys(localStorage).sort().forEach(k => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(k))
-      csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n";
-  });
+  let csv = "date," + Array.from({length:24},(_,i)=>`h${String(i).padStart(2,"0")}`).join(",") + "\n";
+  Object.keys(localStorage)
+    .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .sort()
+    .forEach(k => csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.href = URL.createObjectURL(blob);
   a.download = "light-data.csv";
   a.click();
 };
 
 importBtn.onclick = () => fileInput.click();
 fileInput.onchange = e => {
-  const r = new FileReader();
-  r.onload = () => {
-    r.result.split("\n").slice(1).forEach(l => {
-      if (!l.trim()) return;
-      const [d,...v] = l.split(",");
-      localStorage.setItem(d, JSON.stringify(v.map(Number)));
+  const reader = new FileReader();
+  reader.onload = () => {
+    reader.result.split("\n").slice(1).forEach(line => {
+      if (!line.trim()) return;
+      const [date, ...vals] = line.split(",");
+      localStorage.setItem(date, JSON.stringify(vals.map(Number)));
     });
-    openMonth();
-    alert("Імпорт завершено");
+    renderMonth();
+    alert("Дані імпортовано");
   };
-  r.readAsText(e.target.files[0]);
+  reader.readAsText(e.target.files[0]);
 };
 
 /* ===== START ===== */
-(() => {
+(function start() {
   const now = new Date();
   currentYear = YEARS.includes(now.getFullYear()) ? now.getFullYear() : YEARS[0];
   currentMonth = now.getMonth();
-  openMonth();
+
+  renderYears();
+  renderMonths();
+  renderMonth();
+  show("month");
 })();
 </script>
+
 </body>
 </html>
