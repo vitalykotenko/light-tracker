@@ -19,11 +19,12 @@
 
     .hidden { display: none; }
 
-    /* ===== ACTIONS ===== */
+    /* ===== TOP BAR ===== */
     .top-actions {
       display: flex;
       gap: 12px;
-      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #1c1c1e;
     }
 
     .btn {
@@ -32,16 +33,28 @@
       background: #1c1c1e;
       color: #0a84ff;
       font-size: 14px;
-      text-align: center;
     }
 
     .btn:active { background: #2c2c2e; }
 
-    /* ===== MONTHS ===== */
-    .months { padding: 16px; }
+    .container {
+      padding: 16px;
+    }
 
-    .month { margin-bottom: 32px; }
+    /* ===== LIST ===== */
+    .list-item {
+      padding: 14px;
+      border-radius: 12px;
+      background: #1c1c1e;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
 
+    .list-item:active {
+      background: #2c2c2e;
+    }
+
+    /* ===== MONTH GRID ===== */
     .month-title {
       font-size: 22px;
       margin-bottom: 12px;
@@ -63,12 +76,15 @@
       font-size: 15px;
     }
 
-    .day.filled { background: #1c2a3a; }
-    .day:active { background: #2c2c2e; }
+    .day.filled {
+      background: #1c2a3a;
+    }
 
-    /* ===== DAY ===== */
-    .day-view { padding: 16px; }
+    .day:active {
+      background: #2c2c2e;
+    }
 
+    /* ===== DAY VIEW ===== */
     .top-bar {
       display: flex;
       align-items: center;
@@ -78,10 +94,10 @@
     .back {
       font-size: 17px;
       color: #0a84ff;
+      margin-right: 12px;
     }
 
     .date-title {
-      margin-left: 12px;
       font-size: 15px;
       color: #aaa;
     }
@@ -101,7 +117,6 @@
       justify-content: center;
       font-size: 13px;
       color: #aaa;
-      user-select: none;
     }
 
     .hour.red { background: #b3261e; color: #fff; }
@@ -112,17 +127,24 @@
 </head>
 <body>
 
-<!-- ===== MONTHS ===== -->
-<div id="months" class="months">
-  <div class="top-actions">
-    <div class="btn" id="exportBtn">Зберегти всі дані (CSV)</div>
-    <div class="btn" id="importBtn">Відновити всі дані</div>
-    <input type="file" id="fileInput" accept=".csv">
-  </div>
+<!-- ===== GLOBAL ACTIONS ===== -->
+<div class="top-actions">
+  <div class="btn" id="exportBtn">Експорт CSV</div>
+  <div class="btn" id="importBtn">Імпорт CSV</div>
+  <input type="file" id="fileInput" accept=".csv">
 </div>
 
+<!-- ===== YEARS ===== -->
+<div id="yearsView" class="container hidden"></div>
+
+<!-- ===== MONTHS LIST ===== -->
+<div id="monthsListView" class="container hidden"></div>
+
+<!-- ===== MONTH ===== -->
+<div id="monthView" class="container hidden"></div>
+
 <!-- ===== DAY ===== -->
-<div id="dayView" class="day-view hidden">
+<div id="dayView" class="container hidden">
   <div class="top-bar">
     <div class="back" id="backBtn">← Назад</div>
     <div class="date-title" id="dateTitle"></div>
@@ -131,142 +153,185 @@
 </div>
 
 <script>
-  const YEAR = 2026;
-  const monthsNames = [
-    "Січень","Лютий","Березень","Квітень","Травень","Червень",
-    "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"
-  ];
+/* ===== CONFIG ===== */
+const YEARS = [2026, 2027];
+const MONTHS = [
+  "Січень","Лютий","Березень","Квітень","Травень","Червень",
+  "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"
+];
 
-  const monthsEl = document.getElementById("months");
-  const dayView = document.getElementById("dayView");
-  const hoursGrid = document.getElementById("hoursGrid");
-  const dateTitle = document.getElementById("dateTitle");
-  const backBtn = document.getElementById("backBtn");
-  const exportBtn = document.getElementById("exportBtn");
-  const importBtn = document.getElementById("importBtn");
-  const fileInput = document.getElementById("fileInput");
+/* ===== STATE ===== */
+let navStack = [];
+let currentYear, currentMonth, currentDay;
 
-  let scrollY = 0;
+/* ===== ELEMENTS ===== */
+const yearsView = document.getElementById("yearsView");
+const monthsListView = document.getElementById("monthsListView");
+const monthView = document.getElementById("monthView");
+const dayView = document.getElementById("dayView");
+const backBtn = document.getElementById("backBtn");
+const hoursGrid = document.getElementById("hoursGrid");
+const dateTitle = document.getElementById("dateTitle");
 
-  function renderMonths() {
-    monthsEl.querySelectorAll(".month").forEach(m => m.remove());
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const fileInput = document.getElementById("fileInput");
 
-    monthsNames.forEach((name, monthIndex) => {
-      const monthEl = document.createElement("div");
-      monthEl.className = "month";
+/* ===== NAV ===== */
+function show(view) {
+  [yearsView, monthsListView, monthView, dayView].forEach(v => v.classList.add("hidden"));
+  view.classList.remove("hidden");
+}
 
-      const title = document.createElement("div");
-      title.className = "month-title";
-      title.textContent = `${name} ${YEAR}`;
+function push(view) {
+  navStack.push(view);
+  show(view);
+}
 
-      const grid = document.createElement("div");
-      grid.className = "grid-calendar";
+function back() {
+  navStack.pop();
+  show(navStack[navStack.length - 1]);
+}
 
-      const daysInMonth = new Date(YEAR, monthIndex + 1, 0).getDate();
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const key = `${YEAR}-${String(monthIndex+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-        const saved = JSON.parse(localStorage.getItem(key)) || [];
-
-        const day = document.createElement("div");
-        day.className = "day";
-        day.textContent = d;
-
-        if (saved.some(v => v > 0)) day.classList.add("filled");
-
-        day.onclick = () => openDay(monthIndex, d);
-        grid.appendChild(day);
-      }
-
-      monthEl.appendChild(title);
-      monthEl.appendChild(grid);
-      monthsEl.appendChild(monthEl);
-    });
-  }
-
-  function openDay(month, day) {
-    scrollY = window.scrollY;
-    monthsEl.classList.add("hidden");
-    dayView.classList.remove("hidden");
-
-    const key = `${YEAR}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    dateTitle.textContent = `${day} ${monthsNames[month].toLowerCase()} ${YEAR}`;
-
-    hoursGrid.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
-
-    for (let i = 0; i < 24; i++) {
-      const h = document.createElement("div");
-      h.className = "hour";
-      h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
-
-      applyState(h, data[i]);
-
-      h.onclick = () => {
-        data[i] = (data[i] + 1) % 3;
-        localStorage.setItem(key, JSON.stringify(data));
-        applyState(h, data[i]);
-      };
-
-      hoursGrid.appendChild(h);
-    }
-  }
-
-  function applyState(el, state) {
-    el.classList.remove("red","green");
-    if (state === 1) el.classList.add("red");
-    if (state === 2) el.classList.add("green");
-  }
-
-  backBtn.onclick = () => {
-    dayView.classList.add("hidden");
-    monthsEl.classList.remove("hidden");
-    renderMonths();
-    window.scrollTo(0, scrollY);
-  };
-
-  exportBtn.onclick = () => {
-    let csv = "date," +
-      Array.from({length:24},(_,i)=>`h${String(i).padStart(2,"0")}`).join(",") + "\n";
-
-    Object.keys(localStorage)
-      .filter(k => k.startsWith("2026-"))
-      .sort()
-      .forEach(key => {
-        const data = JSON.parse(localStorage.getItem(key));
-        csv += key + "," + data.join(",") + "\n";
-      });
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "light-2026.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  importBtn.onclick = () => fileInput.click();
-
-  fileInput.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const lines = reader.result.split("\n").slice(1);
-      lines.forEach(line => {
-        if (!line.trim()) return;
-        const [date, ...values] = line.trim().split(",");
-        localStorage.setItem(date, JSON.stringify(values.map(Number)));
-      });
-      renderMonths();
-      alert("Дані відновлено");
+/* ===== YEARS ===== */
+function renderYears() {
+  yearsView.innerHTML = "";
+  YEARS.forEach(y => {
+    const d = document.createElement("div");
+    d.className = "list-item";
+    d.textContent = y;
+    d.onclick = () => {
+      currentYear = y;
+      renderMonthsList();
+      push(monthsListView);
     };
-    reader.readAsText(file);
-  };
+    yearsView.appendChild(d);
+  });
+}
 
-  renderMonths();
+/* ===== MONTHS LIST ===== */
+function renderMonthsList() {
+  monthsListView.innerHTML = "";
+  MONTHS.forEach((m, i) => {
+    const d = document.createElement("div");
+    d.className = "list-item";
+    d.textContent = m;
+    d.onclick = () => {
+      currentMonth = i;
+      renderMonth();
+      push(monthView);
+    };
+    monthsListView.appendChild(d);
+  });
+}
+
+/* ===== MONTH GRID ===== */
+function renderMonth() {
+  monthView.innerHTML = "";
+
+  const title = document.createElement("div");
+  title.className = "month-title";
+  title.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+
+  const grid = document.createElement("div");
+  grid.className = "grid-calendar";
+
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+
+    const day = document.createElement("div");
+    day.className = "day";
+    day.textContent = d;
+    if (saved.some(v => v > 0)) day.classList.add("filled");
+
+    day.onclick = () => {
+      currentDay = d;
+      renderDay();
+      push(dayView);
+    };
+
+    grid.appendChild(day);
+  }
+
+  monthView.appendChild(title);
+  monthView.appendChild(grid);
+}
+
+/* ===== DAY ===== */
+function renderDay() {
+  hoursGrid.innerHTML = "";
+  const key = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(currentDay).padStart(2,"0")}`;
+  dateTitle.textContent = `${currentDay} ${MONTHS[currentMonth].toLowerCase()} ${currentYear}`;
+
+  const data = JSON.parse(localStorage.getItem(key)) || Array(24).fill(0);
+
+  for (let i = 0; i < 24; i++) {
+    const h = document.createElement("div");
+    h.className = "hour";
+    h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
+
+    if (data[i] === 1) h.classList.add("red");
+    if (data[i] === 2) h.classList.add("green");
+
+    h.onclick = () => {
+      data[i] = (data[i] + 1) % 3;
+      localStorage.setItem(key, JSON.stringify(data));
+      h.className = "hour";
+      if (data[i] === 1) h.classList.add("red");
+      if (data[i] === 2) h.classList.add("green");
+    };
+
+    hoursGrid.appendChild(h);
+  }
+}
+
+/* ===== BACK ===== */
+backBtn.onclick = back;
+
+/* ===== EXPORT / IMPORT ===== */
+exportBtn.onclick = () => {
+  let csv = "date," + Array.from({length:24},(_,i)=>`h${String(i).padStart(2,"0")}`).join(",") + "\n";
+  Object.keys(localStorage).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort()
+    .forEach(k => csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "light-data.csv";
+  a.click();
+};
+
+importBtn.onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    reader.result.split("\n").slice(1).forEach(line => {
+      if (!line.trim()) return;
+      const [date, ...vals] = line.split(",");
+      localStorage.setItem(date, JSON.stringify(vals.map(Number)));
+    });
+    renderMonth();
+    alert("Дані імпортовано");
+  };
+  reader.readAsText(e.target.files[0]);
+};
+
+/* ===== START ===== */
+(function start() {
+  const now = new Date();
+  currentYear = YEARS.includes(now.getFullYear()) ? now.getFullYear() : YEARS[0];
+  currentMonth = now.getMonth();
+
+  renderYears();
+  renderMonthsList();
+  renderMonth();
+
+  navStack = [];
+  push(monthView);
+})();
 </script>
 
 </body>
