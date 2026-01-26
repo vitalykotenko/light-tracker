@@ -20,6 +20,8 @@
   --stroke: rgba(255, 255, 255, 0.18);
   --stroke-soft: rgba(255, 255, 255, 0.08);
   --accent: #0A84FF;
+  --red-bright: #FF453A;
+  --green-bright: #32D74B;
   --radius: 14px;
 }
 
@@ -112,11 +114,11 @@ body {
   transition: all 0.2s;
 }
 
-/* ФІКС: Більш синій колір як у таймері Work Timer */
+/* Яркий синий как в Work Timer */
 .day.filled { 
-  background: rgba(10, 132, 255, 0.35); 
-  border-color: rgba(10, 132, 255, 0.65);
-  box-shadow: 0 0 15px rgba(10, 132, 255, 0.3);
+  background: var(--accent); 
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
 }
 
 /* ===== HOURS ===== */
@@ -134,18 +136,20 @@ body {
   justify-content: center;
   font-size: 11px;
   color: #8E8E93;
+  font-weight: 600;
 }
 
+/* Яркие индикаторы */
 .hour.red { 
-  background: rgba(255, 69, 58, 0.25); 
-  border-color: rgba(255, 69, 58, 0.5);
-  color: #FF453A; 
+  background: var(--red-bright); 
+  border-color: rgba(255,255,255,0.2);
+  color: #fff; 
 }
 
 .hour.green { 
-  background: rgba(48, 209, 88, 0.25); 
-  border-color: rgba(48, 209, 88, 0.5);
-  color: #30D158; 
+  background: var(--green-bright); 
+  border-color: rgba(255,255,255,0.2);
+  color: #fff; 
 }
 
 /* ===== MONTH TIMELINE ===== */
@@ -187,7 +191,6 @@ input[type="file"] { display: none; }
 <div id="dayView" class="container hidden"></div>
 
 <script>
-/* JS без змін логіки */
 const YEARS = [2026, 2027];
 const MONTHS = ["Січень","Лютий","Березень","Квітень","Травень","Червень",
                 "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
@@ -349,7 +352,7 @@ function renderDay() {
 exportBtn.onclick = () => {
   let csv = "date," + Array.from({length:24},(_,i)=>`h${i}`).join(",") + "\n";
   Object.keys(localStorage).sort().forEach(k => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(k))
+    if (/^\d{4}-\d.test(k))
       csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n";
   });
   const a = document.createElement("a");
