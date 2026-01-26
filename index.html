@@ -20,8 +20,8 @@
   --stroke: rgba(255, 255, 255, 0.18);
   --stroke-soft: rgba(255, 255, 255, 0.08);
   --accent: #0A84FF;
-  --red-bright: #FF453A;
-  --green-bright: #32D74B;
+  --red-bright: #FF453A;   /* Системный яркий красный */
+  --green-bright: #32D74B; /* Системный яркий зеленый */
   --radius: 14px;
 }
 
@@ -117,8 +117,8 @@ body {
 /* Яркий синий как в Work Timer */
 .day.filled { 
   background: var(--accent); 
-  border-color: rgba(255,255,255,0.3);
-  box-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 0 15px rgba(10, 132, 255, 0.6);
 }
 
 /* ===== HOURS ===== */
@@ -139,16 +139,16 @@ body {
   font-weight: 600;
 }
 
-/* Яркие индикаторы */
+/* Максимально яркие индикаторы без прозрачности */
 .hour.red { 
-  background: var(--red-bright); 
-  border-color: rgba(255,255,255,0.2);
+  background: var(--red-bright) !important; 
+  border-color: rgba(255,255,255,0.3);
   color: #fff; 
 }
 
 .hour.green { 
-  background: var(--green-bright); 
-  border-color: rgba(255,255,255,0.2);
+  background: var(--green-bright) !important; 
+  border-color: rgba(255,255,255,0.3);
   color: #fff; 
 }
 
@@ -336,8 +336,8 @@ function renderDay() {
     const h = document.createElement("div");
     h.className = "hour";
     h.textContent = `${String(i).padStart(2,"0")}–${String(i+1).padStart(2,"0")}`;
-    if (data[i] === 1) h.classList.add("red");
-    if (data[i] === 2) h.classList.add("green");
+    if (data[i] === 1) h.className += " red";
+    if (data[i] === 2) h.className += " green";
     h.onclick = () => {
       data[i] = (data[i] + 1) % 3;
       localStorage.setItem(key, JSON.stringify(data));
@@ -349,10 +349,11 @@ function renderDay() {
 }
 
 /* ===== CSV ===== */
-exportBtn.onclick = () => {
+document.getElementById('exportBtn').onclick = () => {
   let csv = "date," + Array.from({length:24},(_,i)=>`h${i}`).join(",") + "\n";
   Object.keys(localStorage).sort().forEach(k => {
-    if (/^\d{4}-\d.test(k))
+    // Исправленная регулярка
+    if (/^\d{4}-\d{2}-\d{2}$/.test(k))
       csv += k + "," + JSON.parse(localStorage.getItem(k)).join(",") + "\n";
   });
   const a = document.createElement("a");
@@ -361,8 +362,8 @@ exportBtn.onclick = () => {
   a.click();
 };
 
-importBtn.onclick = () => fileInput.click();
-fileInput.onchange = e => {
+document.getElementById('importBtn').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange = e => {
   const r = new FileReader();
   r.onload = () => {
     r.result.split("\n").slice(1).forEach(l => {
